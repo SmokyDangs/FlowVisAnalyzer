@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FlowVis - Medical VTP Visualization</title>
+    <link rel="stylesheet" href="style.css">
+    
+    <!-- ES Module Support -->
+    <script async src="https://unpkg.com/es-module-shims@1.8.3/dist/es-module-shims.js"></script>
+    <script type="importmap">
+    {
+        "imports": {
+            "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+            "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/",
+            "vtkXMLPolyDataReader": "https://cdn.skypack.dev/@kitware/vtk.js/IO/XML/XMLPolyDataReader"
+        }
+    }
+    </script>
+</head>
+<body>
+    <div id="container"></div>
+    <div id="controls">
+        <h1>FlowVis Medical</h1>
+        
+        <div class="control-group">
+            <h3>Medical Data Upload</h3>
+            <div class="upload-zone">
+                <label for="upload-organ" class="file-label">Organ Mesh (.vtp)</label>
+                <input type="file" id="upload-organ" accept=".vtp">
+            </div>
+            <div class="upload-zone">
+                <label for="upload-streamlines" class="file-label">Streamlines (.vtp)</label>
+                <input type="file" id="upload-streamlines" accept=".vtp">
+            </div>
+            <div id="status-message" class="status-idle">Ready to load data.</div>
+        </div>
+
+        <div class="control-group">
+            <h3>Visualization Layers</h3>
+            <label>
+                <input type="checkbox" id="toggle-organ" checked> Organ Mesh
+            </label>
+            <label>
+                <input type="checkbox" id="toggle-streamlines" checked> Streamlines
+            </label>
+            <label>
+                <input type="checkbox" id="toggle-animated-glyphs" checked> Animated Glyphs
+            </label>
+            <label>
+                <input type="checkbox" id="toggle-helpers" checked> Grid & Axes
+            </label>
+        </div>
+
+        <div class="control-group settings-panel">
+            <h3>Visualization Settings</h3>
+
+            <div class="setting">
+                <label>Flow Speed</label>
+                <input type="range" id="setting-speed" min="0" max="0.05" step="0.001" value="0.005">
+            </div>
+
+            <div class="setting">
+                <label>Glyph Size</label>
+                <input type="range" id="setting-glyph-size" min="0.1" max="5" step="0.1" value="1">
+            </div>
+
+            <div class="setting">
+                <label>Glyph Density</label>
+                <input type="range" id="setting-glyph-density" min="1" max="20" step="1" value="5">
+            </div>
+
+            <div class="setting">
+                <label>Tube Radius</label>
+                <input type="range" id="setting-tube-radius" min="0.05" max="2" step="0.05" value="0.5">
+            </div>
+
+            <div class="setting">
+                <label>Organ Opacity</label>
+                <input type="range" id="setting-organ-opacity" min="0" max="1" step="0.05" value="0.5">
+            </div>
+
+            <div class="setting">
+                <label>Glyph Style</label>
+                <select id="setting-glyph-style">
+                    <option value="cone">Cone (Default)</option>
+                    <option value="capsule">Capsule</option>
+                    <option value="sphere">Sphere</option>
+                    <option value="ribbon">Ribbon (Flat)</option>
+                </select>
+            </div>
+
+            <div class="setting">
+                <label>Streamline Style</label>
+                <select id="setting-streamline-style">
+                    <option value="tube">Tube (Default)</option>
+                    <option value="ribbon">Ribbon (Flat)</option>
+                    <option value="smoke">Smoke (Particles)</option>
+                </select>
+            </div>
+
+            <button id="btn-play-pause">Pause Animation</button>
+        </div>
+
+        <div class="info">
+            <p>Upload .vtp files to begin.</p>
+        </div>
+    </div>
+
+    <!-- Application entry point -->
+    <script type="module" src="main.js"></script>
+</body>
+</html>
