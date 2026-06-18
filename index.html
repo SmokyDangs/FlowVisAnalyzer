@@ -3,7 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FlowVis - Medical VTP Visualization</title>
+    <title>FlowVis Medical - Research Standard Flow Analyzer</title>
+    
+    <!-- Google Fonts for professional scientific UI -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
     <link rel="stylesheet" href="style.css">
     
     <!-- ES Module Support -->
@@ -19,91 +25,222 @@
     </script>
 </head>
 <body>
+    <!-- 3D Canvas Container -->
     <div id="container"></div>
+    
+    <!-- Professional HUD Dashboard -->
     <div id="controls">
-        <h1>FlowVis Medical</h1>
+        <div id="controls-header">
+            <h1>FlowVis Medical 🔬</h1>
+            <div class="header-toggles">
+                <button id="btn-toggle-dark" class="icon-btn" data-tooltip="<span class='material-symbols-outlined'>dark_mode</span> Toggle Dark Mode" aria-label="Toggle dark mode">
+                    <span class="material-symbols-outlined">dark_mode</span>
+                </button>
+                <button id="btn-toggle-high-contrast" class="icon-btn" data-tooltip="<span class='material-symbols-outlined'>contrast</span> High Contrast Mode" aria-label="Toggle high contrast">
+                    <span class="material-symbols-outlined">contrast</span>
+                </button>
+            </div>
+        </div>
         
-        <div class="control-group">
-            <h3>Medical Data Upload</h3>
-            <div class="upload-zone">
-                <label for="upload-organ" class="file-label">Organ Mesh (.vtp)</label>
-                <input type="file" id="upload-organ" accept=".vtp">
-            </div>
-            <div class="upload-zone">
-                <label for="upload-streamlines" class="file-label">Streamlines (.vtp)</label>
-                <input type="file" id="upload-streamlines" accept=".vtp">
-            </div>
-            <div id="status-message" class="status-idle">Ready to load data.</div>
+        <!-- Tab Navigation -->
+        <div class="tabs">
+            <button class="tab-btn active" data-tab="tab-data" data-tooltip="Data tab: upload files and select scalars">📁 Data</button>
+            <button class="tab-btn" data-tab="tab-visuals" data-tooltip="Visuals tab: style and color maps">🎨 Style</button>
+            <button class="tab-btn" data-tab="tab-clipping" data-tooltip="Clipping tab: slice view">✂️ Slice</button>
+            <button class="tab-btn" data-tab="tab-export" data-tooltip="Export tab: screenshot options">💾 Save</button>
         </div>
 
-        <div class="control-group">
-            <h3>Visualization Layers</h3>
-            <label>
-                <input type="checkbox" id="toggle-organ" checked> Organ Mesh
-            </label>
-            <label>
-                <input type="checkbox" id="toggle-streamlines" checked> Streamlines
-            </label>
-            <label>
-                <input type="checkbox" id="toggle-animated-glyphs" checked> Animated Glyphs
-            </label>
-            <label>
-                <input type="checkbox" id="toggle-helpers" checked> Grid & Axes
-            </label>
+        <!-- TAB: DATA -->
+        <div id="tab-data" class="tab-content active">
+            <div class="control-group">
+                <h3>Medical Data Upload</h3>
+                <div class="upload-zone">
+                    <label for="upload-organ" class="file-label">Organ Mesh (.vtp)</label>
+                    <input type="file" id="upload-organ" accept=".vtp">
+                </div>
+                <div class="upload-zone">
+                    <label for="upload-streamlines" class="file-label">Streamlines (.vtp)</label>
+                    <input type="file" id="upload-streamlines" accept=".vtp">
+                </div>
+                <button id="btn-load-demo" class="demo-btn">Load Demo Scenario (Stenosis)</button>
+                <div id="status-message" class="status-idle" aria-live="polite" role="status">Ready to load data.</div>
+            </div>
+            
+            <div class="control-group" id="active-scalar-group" style="display: none;">
+                <h3>Active Scalar Fields</h3>
+                <div class="setting">
+                    <label for="select-organ-scalar">Organ Color Field</label>
+                    <select id="select-organ-scalar">
+                        <option value="">None (Constant Gray)</option>
+                    </select>
+                </div>
+                <div class="setting">
+                    <label for="select-streamline-scalar">Streamline Field</label>
+                    <select id="select-streamline-scalar">
+                        <option value="">None (Constant Blue)</option>
+                    </select>
+                </div>
+            </div>
         </div>
 
-        <div class="control-group settings-panel">
-            <h3>Visualization Settings</h3>
-
-            <div class="setting">
-                <label>Flow Speed</label>
-                <input type="range" id="setting-speed" min="0" max="0.05" step="0.001" value="0.005">
+        <!-- TAB: VISUALS -->
+        <div id="tab-visuals" class="tab-content">
+            <div class="control-group">
+                <h3>Visualization Layers</h3>
+                <label>
+                    <input type="checkbox" id="toggle-organ" checked> Organ Mesh
+                </label>
+                <label>
+                    <input type="checkbox" id="toggle-streamlines" checked> Streamlines
+                </label>
+                <label>
+                    <input type="checkbox" id="toggle-animated-glyphs" checked> Animated Glyphs
+                </label>
+                <label>
+                    <input type="checkbox" id="toggle-helpers" checked> Grid & Axes
+                </label>
             </div>
 
-            <div class="setting">
-                <label>Glyph Size</label>
-                <input type="range" id="setting-glyph-size" min="0.1" max="5" step="0.1" value="1">
+            <div class="control-group settings-panel">
+                <h3>Color & Style LUT</h3>
+                <div class="setting">
+                    <label for="setting-colormap">Colormap (LUT)</label>
+                    <select id="setting-colormap">
+                        <option value="viridis">Viridis (Uniform)</option>
+                        <option value="coolwarm" selected>Cool-to-Warm (CFD)</option>
+                        <option value="jet">Jet (Rainbow)</option>
+                        <option value="hot">Hot (Thermal)</option>
+                        <option value="grayscale">Grayscale (Print)</option>
+                    </select>
+                </div>
+                <div class="setting">
+                    <label for="setting-streamline-style">Streamline Representation</label>
+                    <select id="setting-streamline-style">
+                        <option value="tube">Tube (3D Solid)</option>
+                        <option value="ribbon">Ribbon (Flat Band)</option>
+                        <option value="smoke">Smoke (Particles)</option>
+                    </select>
+                </div>
+                <div class="setting">
+                    <label for="setting-glyph-style">Glyph Type</label>
+                    <select id="setting-glyph-style">
+                        <option value="cone">Cone (Directional)</option>
+                        <option value="capsule">Capsule</option>
+                        <option value="sphere">Sphere</option>
+                        <option value="ribbon">Ribbon</option>
+                    </select>
+                </div>
             </div>
 
-            <div class="setting">
-                <label>Glyph Density</label>
-                <input type="range" id="setting-glyph-density" min="1" max="20" step="1" value="5">
+            <div class="control-group settings-panel">
+                <h3>Tuning Controls</h3>
+                <div class="setting">
+                    <label>Flow Speed: <span id="val-speed" class="mono">0.005</span></label>
+                    <input type="range" id="setting-speed" min="0" max="0.03" step="0.0005" value="0.005">
+                </div>
+                <div class="setting">
+                    <label>Glyph Size: <span id="val-glyph-size" class="mono">1.0</span></label>
+                    <input type="range" id="setting-glyph-size" min="0.1" max="4" step="0.1" value="1.0">
+                </div>
+                <div class="setting">
+                    <label>Glyph Density: <span id="val-glyph-density" class="mono">5</span></label>
+                    <input type="range" id="setting-glyph-density" min="1" max="15" step="1" value="5">
+                </div>
+                <div class="setting">
+                    <label>Tube Radius: <span id="val-tube-radius" class="mono">0.5</span></label>
+                    <input type="range" id="setting-tube-radius" min="0.05" max="2" step="0.05" value="0.5">
+                </div>
+                <div class="setting">
+                    <label>Organ Opacity: <span id="val-organ-opacity" class="mono">0.5</span></label>
+                    <input type="range" id="setting-organ-opacity" min="0" max="1" step="0.05" value="0.5">
+                </div>
+                <label class="checkbox-label">
+                    <input type="checkbox" id="setting-scale-radius" checked> Scale Radius by Scalar
+                </label>
+                <button id="btn-play-pause">Pause Animation</button>
             </div>
+        </div>
 
-            <div class="setting">
-                <label>Tube Radius</label>
-                <input type="range" id="setting-tube-radius" min="0.05" max="2" step="0.05" value="0.5">
+        <!-- TAB: CLIPPING -->
+        <div id="tab-clipping" class="tab-content">
+            <div class="control-group">
+                <h3>Clipping Planes</h3>
+                <p class="section-desc">Slice geometries along coordinate axes to examine interior flows.</p>
+                
+                <div class="setting">
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="toggle-clip-x"> Enable X-Slice
+                    </label>
+                    <input type="range" id="clip-x" min="-100" max="100" value="100" disabled>
+                </div>
+                
+                <div class="setting">
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="toggle-clip-y"> Enable Y-Slice
+                    </label>
+                    <input type="range" id="clip-y" min="-100" max="100" value="100" disabled>
+                </div>
+                
+                <div class="setting">
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="toggle-clip-z"> Enable Z-Slice
+                    </label>
+                    <input type="range" id="clip-z" min="-100" max="100" value="100" disabled>
+                </div>
+                
+                <button id="btn-reset-clip" class="secondary-btn">Reset All Slices</button>
             </div>
+        </div>
 
-            <div class="setting">
-                <label>Organ Opacity</label>
-                <input type="range" id="setting-organ-opacity" min="0" max="1" step="0.05" value="0.5">
+        <!-- TAB: EXPORT -->
+        <div id="tab-export" class="tab-content">
+            <div class="control-group">
+                <h3>Scientific Publication Exporter</h3>
+                <div class="setting">
+                    <label for="setting-export-bg">Background Preset</label>
+                    <select id="setting-export-bg" aria-label="Background preset for export">
+                        <option value="transparent">Transparent (Post-processing)</option>
+                        <option value="white">White (Papers / Journals)</option>
+                        <option value="black" selected>Black (Standard Presentation)</option>
+                    </select>
+                </div>
+                <label class="checkbox-label">
+                    <input type="checkbox" id="setting-export-hide-helpers" checked aria-label="Hide helpers in screenshot">
+                    Auto-Hide Grid/Axes in Screenshot
+                </label>
+                <div class="setting preset-views">
+                    <button id="btn-view-front" class="icon-btn" data-tooltip="<span class='material-symbols-outlined'>square</span> Front View" aria-label="Front view">
+                        <span class="material-symbols-outlined">square</span>
+                    </button>
+                    <button id="btn-view-side" class="icon-btn" data-tooltip="<span class='material-symbols-outlined'>view_week</span> Side View" aria-label="Side view">
+                        <span class="material-symbols-outlined">view_week</span>
+                    </button>
+                    <button id="btn-view-top" class="icon-btn" data-tooltip="<span class='material-symbols-outlined'>layers</span> Top View" aria-label="Top view">
+                        <span class="material-symbols-outlined">layers</span>
+                    </button>
+                    <button id="btn-view-iso" class="icon-btn" data-tooltip="<span class='material-symbols-outlined'>3d_rotation</span> Isometric View" aria-label="Isometric view">
+                        <span class="material-symbols-outlined">3d_rotation</span>
+                    </button>
+                </div>
+                <button id="btn-screenshot" class="export-btn" aria-label="Capture screenshot as PNG">Capture High-Res PNG</button>
             </div>
-
-            <div class="setting">
-                <label>Glyph Style</label>
-                <select id="setting-glyph-style">
-                    <option value="cone">Cone (Default)</option>
-                    <option value="capsule">Capsule</option>
-                    <option value="sphere">Sphere</option>
-                    <option value="ribbon">Ribbon (Flat)</option>
-                </select>
-            </div>
-
-            <div class="setting">
-                <label>Streamline Style</label>
-                <select id="setting-streamline-style">
-                    <option value="tube">Tube (Default)</option>
-                    <option value="ribbon">Ribbon (Flat)</option>
-                    <option value="smoke">Smoke (Particles)</option>
-                </select>
-            </div>
-
-            <button id="btn-play-pause">Pause Animation</button>
         </div>
 
         <div class="info">
-            <p>Upload .vtp files to begin.</p>
+            <p>Upload medical VTP datasets or load the demo scenario to begin.</p>
+        </div>
+    </div>
+
+    <!-- 2D Colorbar HUD Overlay -->
+    <div id="color-legend" style="display: none;">
+        <div id="legend-field-name">Velocity Magnitude</div>
+        <div class="legend-gradient-wrapper">
+            <div id="legend-gradient"></div>
+        </div>
+        <div class="legend-labels">
+            <span id="legend-min">0.00</span>
+            <span id="legend-mid">0.50</span>
+            <span id="legend-max">1.00</span>
         </div>
     </div>
 
