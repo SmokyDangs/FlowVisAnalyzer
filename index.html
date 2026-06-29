@@ -31,7 +31,7 @@
     <!-- Professional HUD Dashboard -->
     <div id="controls">
         <div id="controls-header">
-            <h1>FlowVis Medical 🔬</h1>
+            <h1><span class="material-symbols-outlined header-logo">monitor_heart</span> FlowVis Medical</h1>
             <div class="header-toggles">
                 <button id="btn-toggle-dark" class="icon-btn" data-tooltip="<span class='material-symbols-outlined'>dark_mode</span> Toggle Dark Mode" aria-label="Toggle dark mode">
                     <span class="material-symbols-outlined">dark_mode</span>
@@ -44,30 +44,40 @@
         
         <!-- Tab Navigation -->
         <div class="tabs">
-            <button class="tab-btn active" data-tab="tab-data" data-tooltip="Data tab: upload files and select scalars">📁 Data</button>
-            <button class="tab-btn" data-tab="tab-visuals" data-tooltip="Visuals tab: style and color maps">🎨 Style</button>
-            <button class="tab-btn" data-tab="tab-clipping" data-tooltip="Clipping tab: slice view">✂️ Slice</button>
-            <button class="tab-btn" data-tab="tab-export" data-tooltip="Export tab: screenshot options">💾 Save</button>
+            <button class="tab-btn active" data-tab="tab-data" data-tooltip="Data tab: upload files and select scalars">
+                <span class="material-symbols-outlined tab-icon">folder_open</span> Data
+            </button>
+            <button class="tab-btn" data-tab="tab-visuals" data-tooltip="Visuals tab: style and color maps">
+                <span class="material-symbols-outlined tab-icon">palette</span> Style
+            </button>
+            <button class="tab-btn" data-tab="tab-clipping" data-tooltip="Clipping tab: slice view">
+                <span class="material-symbols-outlined tab-icon">content_cut</span> Slice
+            </button>
+            <button class="tab-btn" data-tab="tab-export" data-tooltip="Export tab: screenshot options">
+                <span class="material-symbols-outlined tab-icon">save</span> Save
+            </button>
         </div>
 
         <!-- TAB: DATA -->
         <div id="tab-data" class="tab-content active">
-            <div class="control-group">
-                <h3>Medical Data Upload</h3>
+            <div class="card">
+                <h3><span class="material-symbols-outlined section-icon">upload_file</span> Medical Data Upload</h3>
                 <div class="upload-zone">
+                    <span class="material-symbols-outlined upload-icon">cardiology</span>
                     <label for="upload-organ" class="file-label">Organ Mesh (.vtp)</label>
                     <input type="file" id="upload-organ" accept=".vtp">
                 </div>
                 <div class="upload-zone">
+                    <span class="material-symbols-outlined upload-icon">ssid_chart</span>
                     <label for="upload-streamlines" class="file-label">Streamlines (.vtp)</label>
                     <input type="file" id="upload-streamlines" accept=".vtp">
                 </div>
-                <button id="btn-load-demo" class="demo-btn">Load Demo Scenario (Stenosis)</button>
+                <button id="btn-load-demo" class="demo-btn"><span class="material-symbols-outlined btn-icon">science</span> Load Demo Scenario (Stenosis)</button>
                 <div id="status-message" class="status-idle" aria-live="polite" role="status">Ready to load data.</div>
             </div>
             
-            <div class="control-group" id="active-scalar-group" style="display: none;">
-                <h3>Active Scalar Fields</h3>
+            <div class="card" id="active-scalar-group" style="display: none;">
+                <h3><span class="material-symbols-outlined section-icon">tune</span> Active Scalar Fields</h3>
                 <div class="setting">
                     <label for="select-organ-scalar">Organ Color Field</label>
                     <select id="select-organ-scalar">
@@ -85,24 +95,24 @@
 
         <!-- TAB: VISUALS -->
         <div id="tab-visuals" class="tab-content">
-            <div class="control-group">
-                <h3>Visualization Layers</h3>
-                <label>
+            <div class="card">
+                <h3><span class="material-symbols-outlined section-icon">layers</span> Visualization Layers</h3>
+                <label class="checkbox-label">
                     <input type="checkbox" id="toggle-organ" checked> Organ Mesh
                 </label>
-                <label>
+                <label class="checkbox-label">
                     <input type="checkbox" id="toggle-streamlines" checked> Streamlines
                 </label>
-                <label>
+                <label class="checkbox-label">
                     <input type="checkbox" id="toggle-animated-glyphs" checked> Animated Glyphs
                 </label>
-                <label>
-                    <input type="checkbox" id="toggle-helpers" checked> Grid & Axes
+                <label class="checkbox-label">
+                    <input type="checkbox" id="toggle-helpers" checked> Grid &amp; Axes
                 </label>
             </div>
 
-            <div class="control-group settings-panel">
-                <h3>Color & Style LUT</h3>
+            <div class="card">
+                <h3><span class="material-symbols-outlined section-icon">palette</span> Color &amp; Style</h3>
                 <div class="setting">
                     <label for="setting-colormap">Colormap (LUT)</label>
                     <select id="setting-colormap">
@@ -114,7 +124,7 @@
                     </select>
                 </div>
                 <div class="setting">
-                    <label for="setting-streamline-style">Streamline Representation</label>
+                    <label for="setting-streamline-style">Streamline Style</label>
                     <select id="setting-streamline-style">
                         <option value="tube">Tube (3D Solid)</option>
                         <option value="ribbon">Ribbon (Flat Band)</option>
@@ -132,26 +142,26 @@
                 </div>
             </div>
 
-            <div class="control-group settings-panel">
-                <h3>Tuning Controls</h3>
+            <div class="card">
+                <h3><span class="material-symbols-outlined section-icon">speed</span> Animation &amp; Size</h3>
                 <div class="setting">
-                    <label>Flow Speed: <span id="val-speed" class="mono">0.005</span></label>
+                    <label>Flow Speed <span id="val-speed" class="mono">0.005</span></label>
                     <input type="range" id="setting-speed" min="0" max="0.03" step="0.0005" value="0.005">
                 </div>
                 <div class="setting">
-                    <label>Glyph Size: <span id="val-glyph-size" class="mono">1.0</span></label>
+                    <label>Glyph Size <span id="val-glyph-size" class="mono">1.0</span></label>
                     <input type="range" id="setting-glyph-size" min="0.1" max="4" step="0.1" value="1.0">
                 </div>
                 <div class="setting">
-                    <label>Glyph Density: <span id="val-glyph-density" class="mono">5</span></label>
+                    <label>Glyph Density <span id="val-glyph-density" class="mono">5</span></label>
                     <input type="range" id="setting-glyph-density" min="1" max="15" step="1" value="5">
                 </div>
                 <div class="setting">
-                    <label>Tube Radius: <span id="val-tube-radius" class="mono">0.5</span></label>
+                    <label>Tube Radius <span id="val-tube-radius" class="mono">0.5</span></label>
                     <input type="range" id="setting-tube-radius" min="0.05" max="2" step="0.05" value="0.5">
                 </div>
                 <div class="setting">
-                    <label>Organ Opacity: <span id="val-organ-opacity" class="mono">0.5</span></label>
+                    <label>Organ Opacity <span id="val-organ-opacity" class="mono">0.5</span></label>
                     <input type="range" id="setting-organ-opacity" min="0" max="1" step="0.05" value="0.5">
                 </div>
                 <label class="checkbox-label">
@@ -163,39 +173,39 @@
 
         <!-- TAB: CLIPPING -->
         <div id="tab-clipping" class="tab-content">
-            <div class="control-group">
-                <h3>Clipping Planes</h3>
+            <div class="card">
+                <h3><span class="material-symbols-outlined section-icon">content_cut</span> Clipping Planes</h3>
                 <p class="section-desc">Slice geometries along coordinate axes to examine interior flows.</p>
                 
-                <div class="setting">
+                <div class="clip-axis">
                     <label class="checkbox-label">
-                        <input type="checkbox" id="toggle-clip-x"> Enable X-Slice
+                        <input type="checkbox" id="toggle-clip-x"> <span class="axis-badge axis-x">X</span> Enable X-Slice
                     </label>
                     <input type="range" id="clip-x" min="-100" max="100" value="100" disabled>
                 </div>
                 
-                <div class="setting">
+                <div class="clip-axis">
                     <label class="checkbox-label">
-                        <input type="checkbox" id="toggle-clip-y"> Enable Y-Slice
+                        <input type="checkbox" id="toggle-clip-y"> <span class="axis-badge axis-y">Y</span> Enable Y-Slice
                     </label>
                     <input type="range" id="clip-y" min="-100" max="100" value="100" disabled>
                 </div>
                 
-                <div class="setting">
+                <div class="clip-axis">
                     <label class="checkbox-label">
-                        <input type="checkbox" id="toggle-clip-z"> Enable Z-Slice
+                        <input type="checkbox" id="toggle-clip-z"> <span class="axis-badge axis-z">Z</span> Enable Z-Slice
                     </label>
                     <input type="range" id="clip-z" min="-100" max="100" value="100" disabled>
                 </div>
                 
-                <button id="btn-reset-clip" class="secondary-btn">Reset All Slices</button>
+                <button id="btn-reset-clip" class="secondary-btn"><span class="material-symbols-outlined btn-icon">restart_alt</span> Reset All Slices</button>
             </div>
         </div>
 
         <!-- TAB: EXPORT -->
         <div id="tab-export" class="tab-content">
-            <div class="control-group">
-                <h3>Scientific Publication Exporter</h3>
+            <div class="card">
+                <h3><span class="material-symbols-outlined section-icon">photo_camera</span> Publication Export</h3>
                 <div class="setting">
                     <label for="setting-export-bg">Background Preset</label>
                     <select id="setting-export-bg" aria-label="Background preset for export">
@@ -208,26 +218,34 @@
                     <input type="checkbox" id="setting-export-hide-helpers" checked aria-label="Hide helpers in screenshot">
                     Auto-Hide Grid/Axes in Screenshot
                 </label>
+            </div>
+
+            <div class="card">
+                <h3><span class="material-symbols-outlined section-icon">videocam</span> Camera Presets</h3>
                 <div class="setting preset-views">
                     <button id="btn-view-front" class="icon-btn" data-tooltip="<span class='material-symbols-outlined'>square</span> Front View" aria-label="Front view">
                         <span class="material-symbols-outlined">square</span>
+                        <span class="preset-label">Front</span>
                     </button>
                     <button id="btn-view-side" class="icon-btn" data-tooltip="<span class='material-symbols-outlined'>view_week</span> Side View" aria-label="Side view">
                         <span class="material-symbols-outlined">view_week</span>
+                        <span class="preset-label">Side</span>
                     </button>
                     <button id="btn-view-top" class="icon-btn" data-tooltip="<span class='material-symbols-outlined'>layers</span> Top View" aria-label="Top view">
                         <span class="material-symbols-outlined">layers</span>
+                        <span class="preset-label">Top</span>
                     </button>
                     <button id="btn-view-iso" class="icon-btn" data-tooltip="<span class='material-symbols-outlined'>3d_rotation</span> Isometric View" aria-label="Isometric view">
                         <span class="material-symbols-outlined">3d_rotation</span>
+                        <span class="preset-label">Iso</span>
                     </button>
                 </div>
-                <button id="btn-screenshot" class="export-btn" aria-label="Capture screenshot as PNG">Capture High-Res PNG</button>
+                <button id="btn-screenshot" class="export-btn"><span class="material-symbols-outlined btn-icon">photo_camera</span> Capture High-Res PNG</button>
             </div>
         </div>
 
-        <div class="info">
-            <p>Upload medical VTP datasets or load the demo scenario to begin.</p>
+        <div class="panel-footer">
+            <span class="material-symbols-outlined footer-icon">biotech</span> FlowVis Medical · Research Edition
         </div>
     </div>
 

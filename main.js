@@ -116,7 +116,7 @@ function createSmokeTexture() {
 
 // --- ENGINE LAYER ---
 let scene, camera, renderer, controls;
-let organGroup, streamlinesGroup, animatedGlyphsGroup, smokeGroup;
+let organGroup, streamlinesGroup, animatedGlyphsGroup, smokeGroup, modelGroup;
 let axesHelper, gridHelper;
 let statusElement;
 
@@ -196,7 +196,9 @@ function init() {
     streamlinesGroup = new THREE.Group();
     animatedGlyphsGroup = new THREE.Group();
     smokeGroup = new THREE.Group();
-    scene.add(organGroup, streamlinesGroup, animatedGlyphsGroup, smokeGroup);
+    modelGroup = new THREE.Group();
+    modelGroup.add(organGroup, streamlinesGroup, animatedGlyphsGroup, smokeGroup);
+    scene.add(modelGroup);
 
     // 6. Helpers
     axesHelper = new THREE.AxesHelper(60);
@@ -420,6 +422,9 @@ function generateDemoScenario() {
     // Process streamlines
     processStreamlines(streamlinesPolyData);
     
+    // Center the model in the coordinate system
+    centerModel();
+    
     // Fit camera
     fitCameraToData(organGroup);
     
@@ -432,6 +437,57 @@ function generateDemoScenario() {
     updateClippingSliders(box);
     
     updateStatus("Stenosis demo loaded. Try switching fields, clipping or colormaps!", "success");
+}
+
+function centerModel() {
+    if (!modelGroup) return;
+    
+    // 1. Reset translation
+    modelGroup.position.set(0, 0, 0);
+    modelGroup.updateMatrixWorld(true);
+    
+    // 2. Compute combined bounding box of the active geometries
+    const box = new THREE.Box3();
+    let hasOrgan = false;
+    organGroup.traverse(child => {
+        if (child.isMesh || child.isPoints) {
+            hasOrgan = true;
+        }
+    });
+    
+    let hasStreamlines = false;
+    streamlinesGroup.traverse(child => {
+        if (child.isMesh || child.isPoints) {
+            hasStreamlines = true;
+        }
+    });
+    
+    if (hasOrgan && hasStreamlines) {
+        box.setFromObject(organGroup);
+        const boxStreamlines = new THREE.Box3().setFromObject(streamlinesGroup);
+        box.union(boxStreamlines);
+    } else if (hasOrgan) {
+        box.setFromObject(organGroup);
+    } else if (hasStreamlines) {
+        box.setFromObject(streamlinesGroup);
+    } else {
+        return;
+    }
+    
+    if (box.isEmpty()) return;
+    
+    // 3. Get center of the bounding box
+    const center = box.getCenter(new THREE.Vector3());
+    
+    // 4. Translate modelGroup so its center is at (0, 0, 0)
+    modelGroup.position.copy(center).multiplyScalar(-1);
+    modelGroup.updateMatrixWorld(true);
+    
+    // 5. Adjust gridHelper position y to be just below the model's floor (bottom of bounding box)
+    const centeredMinY = box.min.y - center.y;
+    if (gridHelper) {
+        gridHelper.position.y = centeredMinY - 2;
+    }
 }
 
 // --- DATA PROCESSING LAYER ---
@@ -981,9 +1037,12 @@ function updateGlyphAnimation() {
 
             // Clip points in JS for the custom Points/ShaderMaterial
             let isClipped = false;
-            if (config.clipXEnabled && actualX > config.clipX) isClipped = true;
-            if (config.clipYEnabled && actualY > config.clipY) isClipped = true;
-            if (config.clipZEnabled && actualZ > config.clipZ) isClipped = true;
+            const offsetX = modelGroup ? modelGroup.position.x : 0;
+            const offsetY = modelGroup ? modelGroup.position.y : 0;
+            const offsetZ = modelGroup ? modelGroup.position.z : 0;
+            if (config.clipXEnabled && (actualX + offsetX) > config.clipX) isClipped = true;
+            if (config.clipYEnabled && (actualY + offsetY) > config.clipY) isClipped = true;
+            if (config.clipZEnabled && (actualZ + offsetZ) > config.clipZ) isClipped = true;
 
             pSizes[i] = (1.0 + (p.age / p.lifetime) * 3.5) * config.glyphSize * 4.0;
 
@@ -1403,6 +1462,7 @@ async function handleFileUpload(event, type) {
                     const material = new THREE.PointsMaterial({ color: 0x4facfe, size: 0.5 });
                     organGroup.add(new THREE.Points(geometry, material));
                 }
+                centerModel();
                 fitCameraToData(organGroup);
             } else if (type === 'streamlines') {
                 // Set default scalar if available
@@ -1410,6 +1470,7 @@ async function handleFileUpload(event, type) {
                 if (scalars) config.streamlineScalar = scalars.getName();
                 
                 processStreamlines(polydata);
+                centerModel();
                 if (organGroup.children.length === 0) fitCameraToData(streamlinesGroup);
             }
             
