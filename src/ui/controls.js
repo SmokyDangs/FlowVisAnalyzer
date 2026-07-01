@@ -499,8 +499,20 @@ async function handleFileUpload(event, type) {
                 
                 const geometry = vtkToThreeGeometry(polydata, config.organScalar);
                 if (geometry.index && geometry.index.count > 0) {
-                    const material = new THREE.MeshStandardMaterial({ 
-                        color: 0xffffff, transparent: true, opacity: config.organOpacity, side: THREE.DoubleSide, roughness: 0.5, vertexColors: !!scalars
+                    const material = new THREE.MeshPhysicalMaterial({ 
+                        color: 0xffffff,
+                        transparent: true,
+                        opacity: config.organOpacity,
+                        side: THREE.DoubleSide,
+                        roughness: 0.1,
+                        metalness: 0.05,
+                        clearcoat: 1.0,
+                        clearcoatRoughness: 0.1,
+                        transmission: 0.5,
+                        ior: 1.33,
+                        thickness: 1.5,
+                        depthWrite: false,
+                        vertexColors: !!scalars
                     });
                     material.clippingPlanes = state.activeClippingPlanes;
                     if (state.organGroup) state.organGroup.add(new THREE.Mesh(geometry, material));

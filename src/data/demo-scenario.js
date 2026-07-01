@@ -186,13 +186,19 @@ export function generateDemoScenario() {
     
     // Build Organ Mesh
     const organGeom = vtkToThreeGeometry(state.organPolyData, config.organScalar);
-    const organMat = new THREE.MeshStandardMaterial({
+    const organMat = new THREE.MeshPhysicalMaterial({
         color: 0xffffff,
         transparent: true,
         opacity: config.organOpacity,
         side: THREE.DoubleSide,
-        roughness: 0.4,
-        metalness: 0.1,
+        roughness: 0.1,
+        metalness: 0.05,
+        clearcoat: 1.0,
+        clearcoatRoughness: 0.1,
+        transmission: 0.5,
+        ior: 1.33,
+        thickness: 1.5,
+        depthWrite: false,
         vertexColors: true
     });
     organMat.clippingPlanes = state.activeClippingPlanes;

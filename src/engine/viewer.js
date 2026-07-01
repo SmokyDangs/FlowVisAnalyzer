@@ -44,16 +44,23 @@ export function initViewer() {
         showWebGLError();
     }
 
-    // 4. Lighting
-    state.scene.add(new THREE.AmbientLight(0xffffff, 0.4));
+    // 4. Advanced Lighting Setup
+    state.scene.add(new THREE.AmbientLight(0xffffff, 0.2));
     
-    const dirLight1 = new THREE.DirectionalLight(0xffffff, 0.8);
-    dirLight1.position.set(1, 1, 1).normalize();
+    const hemiLight = new THREE.HemisphereLight(0xffffff, 0x111122, 0.45);
+    state.scene.add(hemiLight);
+    
+    const dirLight1 = new THREE.DirectionalLight(0xffffff, 0.9);
+    dirLight1.position.set(100, 200, 100);
     state.scene.add(dirLight1);
 
-    const dirLight2 = new THREE.DirectionalLight(0x4facfe, 0.4);
-    dirLight2.position.set(-1, -1, -1).normalize();
+    const dirLight2 = new THREE.DirectionalLight(0x4facfe, 0.55);
+    dirLight2.position.set(-100, -100, -100);
     state.scene.add(dirLight2);
+
+    const rimLight = new THREE.DirectionalLight(0x00f2fe, 0.75);
+    rimLight.position.set(-100, 200, -200);
+    state.scene.add(rimLight);
 
     // 5. Layer Groups
     state.organGroup = new THREE.Group();
@@ -64,7 +71,9 @@ export function initViewer() {
 
     // 6. Helpers
     state.axesHelper = new THREE.AxesHelper(60);
-    state.gridHelper = new THREE.GridHelper(300, 30, 0x444444, 0x222222);
+    state.gridHelper = new THREE.GridHelper(400, 40, 0x4facfe, 0x1e2230);
+    state.gridHelper.material.opacity = 0.2;
+    state.gridHelper.material.transparent = true;
     state.gridHelper.position.y = -50;
     state.scene.add(state.axesHelper, state.gridHelper);
 

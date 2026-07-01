@@ -221,8 +221,17 @@ export function regenerateStreamlines() {
                     colormapFn,
                     config.scaleRadiusByScalar
                 );
-                const tubeMat = new THREE.MeshStandardMaterial({ 
-                    transparent: true, opacity: 0.6, side: THREE.DoubleSide, vertexColors: true, roughness: 0.3
+                const tubeMat = new THREE.MeshPhysicalMaterial({ 
+                    transparent: true,
+                    opacity: 0.7,
+                    side: THREE.DoubleSide,
+                    vertexColors: true,
+                    roughness: 0.1,
+                    metalness: 0.1,
+                    clearcoat: 1.0,
+                    clearcoatRoughness: 0.05,
+                    transmission: 0.4,
+                    thickness: 0.4
                 });
                 tubeMat.clippingPlanes = state.activeClippingPlanes;
                 state.streamlinesGroup.add(new THREE.Mesh(tubeGeom, tubeMat));
@@ -239,8 +248,15 @@ export function regenerateStreamlines() {
                     colormapFn,
                     config.scaleRadiusByScalar
                 );
-                const ribbonMat = new THREE.MeshStandardMaterial({ 
-                    transparent: true, opacity: 0.75, side: THREE.DoubleSide, vertexColors: true, roughness: 0.4
+                const ribbonMat = new THREE.MeshPhysicalMaterial({ 
+                    transparent: true,
+                    opacity: 0.8,
+                    side: THREE.DoubleSide,
+                    vertexColors: true,
+                    roughness: 0.15,
+                    metalness: 0.2,
+                    clearcoat: 0.8,
+                    clearcoatRoughness: 0.1
                 });
                 ribbonMat.clippingPlanes = state.activeClippingPlanes;
                 state.streamlinesGroup.add(new THREE.Mesh(ribbonGeom, ribbonMat));
@@ -295,7 +311,7 @@ export function initAnimatedGlyphs() {
 
 export function initSmokeEffect() {
     if (!state.smokeTexture) state.smokeTexture = createSmokeTexture();
-    const particleCount = state.pathCurves.length * 40;
+    const particleCount = state.pathCurves.length * 65;
     const geometry = new THREE.BufferGeometry();
     const positions = new Float32Array(particleCount * 3);
     const colors = new Float32Array(particleCount * 3);
