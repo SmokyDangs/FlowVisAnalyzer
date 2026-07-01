@@ -163,6 +163,7 @@ export function generateDemoScenario() {
     Promise.all([
         import('../ui/controls.js')
     ]).then(([controlsModule]) => {
+        controlsModule.centerModel();
         controlsModule.populateScalarDropdowns();
         controlsModule.updateColorbar();
         

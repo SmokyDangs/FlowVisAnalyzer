@@ -14,21 +14,34 @@ export function initViewer() {
     state.camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 50000);
     state.camera.position.set(150, 100, 150);
 
-    // 2. WebGL Renderer with graceful fallback
-    try {
-        state.renderer = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: true });
-        state.renderer.setSize(window.innerWidth, window.innerHeight);
-        state.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-        state.renderer.localClippingEnabled = true;
-        document.getElementById('container').appendChild(state.renderer.domElement);
-
-        // 3. Orbit Controls
-        state.controls = new OrbitControls(state.camera, state.renderer.domElement);
-        state.controls.enableDamping = true;
-        state.controls.dampingFactor = 0.05;
-    } catch (e) {
-        console.error("WebGL context creation failed:", e);
-        showWebGLErrorBanner(e.message || "WebGL is not supported or disabled in your browser.");
+    // 2. Renderer - try multiple WebGL options with fallback
+    let rendererCreated = false;
+    const rendererOptionsList = [
+        { antialias: true,  preserveDrawingBuffer: true, powerPreference: 'high-performance', failIfMajorPerformanceCaveat: false },
+        { antialias: false, preserveDrawingBuffer: true, powerPreference: 'low-power',        failIfMajorPerformanceCaveat: false },
+        { antialias: false, preserveDrawingBuffer: true, powerPreference: 'default',           failIfMajorPerformanceCaveat: false },
+    ];
+    for (const opts of rendererOptionsList) {
+        if (rendererCreated) break;
+        try {
+            state.renderer = new THREE.WebGLRenderer(opts);
+            state.renderer.setSize(window.innerWidth, window.innerHeight);
+            state.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+            state.renderer.localClippingEnabled = true;
+            document.getElementById('container').appendChild(state.renderer.domElement);
+            rendererCreated = true;
+            
+            // 3. Orbit Controls
+            state.controls = new OrbitControls(state.camera, state.renderer.domElement);
+            state.controls.enableDamping = true;
+            state.controls.dampingFactor = 0.05;
+        } catch (err) {
+            console.warn('WebGL attempt failed:', err.message);
+            state.renderer = null;
+        }
+    }
+    if (!rendererCreated) {
+        showWebGLError();
     }
 
     // 4. Lighting
@@ -136,46 +149,35 @@ export function setCameraPresetView(preset) {
     }
 }
 
-function showWebGLErrorBanner(msg) {
+function showWebGLError() {
     const container = document.getElementById('container');
     if (!container) return;
-    
-    const banner = document.createElement('div');
-    banner.id = 'webgl-error-banner';
-    banner.style.cssText = `
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        padding: 30px;
-        background: rgba(255, 75, 75, 0.15);
-        backdrop-filter: blur(12px);
-        border: 1px solid rgba(255, 75, 75, 0.3);
-        border-radius: 16px;
-        color: #ff4b4b;
-        max-width: 500px;
-        text-align: center;
-        box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
-        z-index: 50;
-        font-family: var(--font-sans);
-    `;
-    
-    banner.innerHTML = `
-        <span class="material-symbols-outlined" style="font-size: 48px; margin-bottom: 16px; display: block;">warning</span>
-        <h2 style="margin: 0 0 10px 0; font-size: 1.35rem; font-weight: 600;">WebGL Context Creation Failed</h2>
-        <p style="margin: 0 0 20px 0; font-size: 0.9rem; line-height: 1.5; color: var(--text-primary);">
-            Your browser or system graphics settings blocked WebGL initialization.<br>
-            <strong style="color: var(--text-secondary); font-size: 0.8rem;">Reason: ${msg}</strong>
-        </p>
-        <div style="text-align: left; background: rgba(0, 0, 0, 0.3); padding: 12px 16px; border-radius: 8px; font-size: 0.8rem; color: var(--text-secondary);">
-            <strong>How to resolve:</strong>
-            <ul style="margin: 6px 0 0 0; padding-left: 20px; line-height: 1.4;">
-                <li>Enable <strong>Use graphics acceleration when available</strong> in browser settings.</li>
-                <li>Make sure graphics card drivers are updated.</li>
-                <li>If using a VM or sandboxed browser, enable WebGL/3D support.</li>
-            </ul>
-        </div>
-    `;
-    container.appendChild(banner);
-    updateStatus("WebGL Error: 3D view is disabled.", "error");
+    container.innerHTML = `
+        <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+            padding:32px;background:rgba(15,15,20,0.97);backdrop-filter:blur(12px);
+            border:1px solid rgba(255,100,100,0.35);border-radius:16px;color:#ff6b6b;
+            max-width:520px;text-align:center;box-shadow:0 16px 48px rgba(0,0,0,0.8);
+            z-index:9999;font-family:'Outfit',sans-serif;">
+            <span class='material-symbols-outlined' style='font-size:52px;margin-bottom:16px;display:block'>display_settings</span>
+            <h2 style='margin:0 0 12px;font-size:1.4rem;color:#fff'>WebGL ist deaktiviert</h2>
+            <p style='margin:0 0 20px;font-size:0.9rem;line-height:1.6;color:#ccc'>
+                Chrome konnte keinen 3D-Kontext erstellen, weil Hardware-Beschleunigung
+                deaktiviert ist.<br>
+                <code style='font-size:0.75rem;color:#aaa'>GL_RENDERER = Disabled</code>
+            </p>
+            <div style='background:rgba(0,0,0,0.4);padding:16px;border-radius:10px;text-align:left;font-size:0.82rem;color:#bbb;line-height:1.7'>
+                <strong style='color:#fff'>So aktivieren Sie WebGL in Chrome:</strong>
+                <ol style='margin:8px 0 0 0;padding-left:20px'>
+                    <li>URL: <strong style='color:#4facfe'>chrome://settings/system</strong></li>
+                    <li>Aktivieren: <em>Grafikbeschleunigung verwenden, wenn verfuegbar</em></li>
+                    <li>Chrome neu starten</li>
+                    <li>Alternativ: <strong style='color:#4facfe'>chrome://flags/#use-angle</strong> setzen auf <em>OpenGL</em></li>
+                </ol>
+            </div>
+            <button onclick='window.location.reload()' style='
+                margin-top:20px;padding:10px 24px;background:#4facfe;
+                border:none;border-radius:8px;color:#000;font-weight:700;
+                font-size:0.9rem;cursor:pointer'>Seite neu laden</button>
+        </div>`;
+    updateStatus('WebGL Fehler: 3D deaktiviert.', 'error');
 }

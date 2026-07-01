@@ -456,9 +456,12 @@ export function updateGlyphAnimation() {
 
             // Clip points in JS for the custom Points/ShaderMaterial
             let isClipped = false;
-            if (config.clipXEnabled && actualX > config.clipX) isClipped = true;
-            if (config.clipYEnabled && actualY > config.clipY) isClipped = true;
-            if (config.clipZEnabled && actualZ > config.clipZ) isClipped = true;
+            const offsetX = state.smokeGroup ? state.smokeGroup.position.x : 0;
+            const offsetY = state.smokeGroup ? state.smokeGroup.position.y : 0;
+            const offsetZ = state.smokeGroup ? state.smokeGroup.position.z : 0;
+            if (config.clipXEnabled && (actualX + offsetX) > config.clipX) isClipped = true;
+            if (config.clipYEnabled && (actualY + offsetY) > config.clipY) isClipped = true;
+            if (config.clipZEnabled && (actualZ + offsetZ) > config.clipZ) isClipped = true;
 
             pSizes[i] = (1.0 + (p.age / p.lifetime) * 3.5) * config.glyphSize * 4.0;
 
