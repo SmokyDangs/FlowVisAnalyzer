@@ -17,6 +17,9 @@ export function generateDemoScenario() {
     const organPolys = [];
     const organVelocity = [];
     const organPressure = [];
+    const organVorticity = [];
+    const organHelicity = [];
+    const organShearRate = [];
     
     for (let iy = 0; iy <= ny; iy++) {
         const y = -length/2 + (iy / ny) * length;
@@ -34,6 +37,16 @@ export function generateDemoScenario() {
         // Bernoulli Pressure: P = P0 - 0.5 * rho * (V^2 - V0^2)
         const pressure = 110 - 0.5 * (vMag * vMag - 9) * 0.8;
         
+        // Wall Shear Rate / Stress approximation: proportional to velocity gradient near the wall
+        const shearRate = 2.5 * (vMag / radRatio);
+        // Vorticity magnitude at the wall
+        let d_twist = 0;
+        if (y > -15) {
+            d_twist = 0.04 * Math.exp(-(y - 15) / 50) * (1 - (y + 15) / 50);
+        }
+        const vorticity = Math.abs(d_twist * 0.5 * vMag);
+        const helicity = d_twist * 0.5 * vMag * vMag;
+        
         for (let it = 0; it < nt; it++) {
             const theta = (it / nt) * Math.PI * 2;
             const x = radius * Math.cos(theta);
@@ -42,6 +55,9 @@ export function generateDemoScenario() {
             organPoints.push(x, y, z);
             organVelocity.push(vMag);
             organPressure.push(pressure);
+            organVorticity.push(vorticity);
+            organHelicity.push(helicity);
+            organShearRate.push(shearRate);
         }
     }
     
@@ -67,7 +83,13 @@ export function generateDemoScenario() {
         organPoints,
         null,
         organPolys,
-        { "Velocity Magnitude": organVelocity, "Hydrostatic Pressure": organPressure }
+        {
+            "Velocity Magnitude": organVelocity,
+            "Hydrostatic Pressure": organPressure,
+            "Vorticity Magnitude": organVorticity,
+            "Helicity Density": organHelicity,
+            "Wall Shear Stress": organShearRate
+        }
     );
     
     // --- 2. Generate Streamlines (Swirling Flow lines) ---
@@ -77,6 +99,9 @@ export function generateDemoScenario() {
     const streamlineLines = [];
     const streamlineVelocity = [];
     const streamlinePressure = [];
+    const streamlineVorticity = [];
+    const streamlineHelicity = [];
+    const streamlineShearRate = [];
     
     let currentPointIdx = 0;
     
@@ -115,8 +140,22 @@ export function generateDemoScenario() {
             // Pressure drop in throat
             const pressure = 110 - 0.5 * (vMag * vMag - 8) * 0.8;
             
+            // Vorticity & Helicity
+            let d_twist = 0;
+            if (y > -15) {
+                d_twist = 0.04 * Math.exp(-(y - 15) / 50) * (1 - (y + 15) / 50);
+            }
+            const vorticity = Math.abs(d_twist * (1.2 - rStart / rNormal) * vMag);
+            const helicity = d_twist * (1.2 - rStart / rNormal) * vMag * vMag;
+            // Shear rate estimate based on velocity spatial derivative
+            const d_radRatio_dy = -(0.65 / 18) * (-y / 18) * Math.exp(-(y * y) / (2 * 18 * 18));
+            const shearRate = Math.abs(-2 * vMag * d_radRatio_dy / radRatio) + vorticity * 0.3;
+            
             streamlineVelocity.push(vMag);
             streamlinePressure.push(pressure);
+            streamlineVorticity.push(vorticity);
+            streamlineHelicity.push(helicity);
+            streamlineShearRate.push(shearRate);
             
             currentPointIdx++;
         }
@@ -126,7 +165,13 @@ export function generateDemoScenario() {
         streamlinePoints,
         streamlineLines,
         null,
-        { "Velocity Magnitude": streamlineVelocity, "Hydrostatic Pressure": streamlinePressure }
+        {
+            "Velocity Magnitude": streamlineVelocity,
+            "Hydrostatic Pressure": streamlinePressure,
+            "Vorticity Magnitude": streamlineVorticity,
+            "Helicity Density": streamlineHelicity,
+            "Shear Rate / Turbulence": streamlineShearRate
+        }
     );
     
     // Clean and rebuild scene

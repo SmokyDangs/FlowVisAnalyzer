@@ -67,9 +67,11 @@ export const colormaps = {
         { r: 0.993, g: 0.906, b: 0.144 }
     ],
     coolwarm: [
-        { r: 0.230, g: 0.299, b: 0.754 },
-        { r: 0.865, g: 0.865, b: 0.865 },
-        { r: 0.706, g: 0.016, b: 0.150 }
+        { r: 0.230, g: 0.299, b: 0.754 }, // scientific blue
+        { r: 0.548, g: 0.648, b: 0.906 }, // light blue-gray
+        { r: 0.865, g: 0.865, b: 0.865 }, // neutral white-gray
+        { r: 0.906, g: 0.648, b: 0.548 }, // light red-gray
+        { r: 0.706, g: 0.016, b: 0.150 }  // scientific red
     ],
     jet: [
         { r: 0.0, g: 0.0, b: 0.5 },

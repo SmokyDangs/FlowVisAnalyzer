@@ -263,6 +263,7 @@ export function initAnimatedGlyphs() {
     switch(config.glyphStyle) {
         case 'capsule':
             geometry = new THREE.CapsuleGeometry(0.5, 1, 4, 8);
+            geometry.rotateX(Math.PI / 2);
             break;
         case 'sphere':
             geometry = new THREE.SphereGeometry(0.7, 8, 8);
